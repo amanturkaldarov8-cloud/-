@@ -1,6 +1,7 @@
 export type Msg = { role: "user" | "assistant"; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://yajiwmvtxdpzotbdplvd.supabase.co";
+const CHAT_URL = `${supabaseUrl}/functions/v1/chat`;
 
 export async function streamChat({
   messages,
@@ -11,11 +12,17 @@ export async function streamChat({
   onDelta: (deltaText: string) => void;
   onDone: () => void;
 }) {
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (!supabaseKey) {
+    console.error("VITE_SUPABASE_PUBLISHABLE_KEY is missing!");
+    throw new Error("API ачкычы табылган жок. Сураныч, администраторго кайрылыңыз.");
+  }
+
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${supabaseKey}`,
     },
     body: JSON.stringify({ messages }),
   });
